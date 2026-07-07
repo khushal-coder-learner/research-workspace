@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Environment
+.env
+.env.*
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# macOS
+.DS_Store
+
+# Node
+node_modules/
+
+# React
+dist/
+
+# Testing
+.pytest_cache/
+.coverage
+
+# Alembic
+backend/alembic/versions/*.pyc
+
+# Misc
+*.sqlite3
