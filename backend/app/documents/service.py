@@ -8,18 +8,9 @@ from sqlalchemy.orm import Session
 
 from app.documents.models import Document, DocumentStatus
 from app.projects.models import Project
-
-
-class ProjectNotFoundError(Exception):
-    pass
-
-
-class DocumentNotFoundError(Exception):
-    pass
-
-
-class InvalidDocumentUploadError(Exception):
-    pass
+from app.core.exceptions import ProjectNotFoundError, DocumentNotFoundError, InvalidDocumentUploadError, QueueUnavailableError
+from app.background.queue import BackgroundQueue, QueueError
+from app.background.schemas import IngestionJob
 
 
 DOCUMENT_STORAGE_DIR = Path(__file__).resolve().parents[2] / "storage" / "documents"
@@ -53,6 +44,7 @@ def upload_document(
     filename: str | None,
     content_type: str | None,
     file_bytes: bytes,
+    ingestion_queue: BackgroundQueue
 ) -> Document:
     _get_project(session, project_id)
     _validate_pdf_upload(filename, content_type)
@@ -82,6 +74,16 @@ def upload_document(
         if file_path.exists():
             file_path.unlink()
         raise
+
+    try:
+        ingestion_queue.enqueue(IngestionJob(document_id=document.id, project_id=project_id))
+        document.status = DocumentStatus.QUEUED
+        session.commit()
+    except QueueError as exc:
+        session.rollback()
+        document.status = DocumentStatus.QUEUE_FAILED
+        session.commit()
+        raise QueueUnavailableError from exc
 
     return document
 

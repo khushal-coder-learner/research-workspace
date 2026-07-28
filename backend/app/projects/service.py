@@ -7,10 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.projects.models import Project
 from app.projects.schemas import ProjectCreate
-
-
-class ProjectNotFoundError(Exception):
-    pass
+from app.core.exceptions import ProjectNotFoundError
 
 
 def create_project(session: Session, project_data: ProjectCreate) -> Project:

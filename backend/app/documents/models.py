@@ -16,6 +16,8 @@ if TYPE_CHECKING:
 
 class DocumentStatus(str, Enum):
     UPLOADED = "UPLOADED"
+    QUEUED = "QUEUED"
+    QUEUE_FAILED = "QUEUE_FAILED"
     PROCESSING = "PROCESSING"
     INDEXED = "INDEXED"
     FAILED = "FAILED"
@@ -44,6 +46,7 @@ class Document(Base):
         SAEnum(DocumentStatus, name="document_status"),
         nullable=False,
         default=DocumentStatus.UPLOADED,
+        server_default=DocumentStatus.UPLOADED.value
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),

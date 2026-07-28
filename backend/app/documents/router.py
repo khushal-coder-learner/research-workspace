@@ -2,14 +2,13 @@ from __future__ import annotations
 
 from uuid import UUID
 
-from fastapi import APIRouter, File, Form, HTTPException, UploadFile, status
+from fastapi import Depends, APIRouter, File, Form, UploadFile, status
 
-from app.core.dependencies import DBSession
+from app.background.queue import BackgroundQueue
+from app.core.dependencies import DBSession, get_ingestion_queue
+from app.core.exceptions import (ProjectNotFoundError, DocumentNotFoundError, InvalidDocumentUploadError)
 from app.documents.schemas import DocumentRead
 from app.documents.service import (
-    DocumentNotFoundError,
-    InvalidDocumentUploadError,
-    ProjectNotFoundError,
     get_document,
     list_documents,
     upload_document,
@@ -19,29 +18,10 @@ from app.documents.models import Document
 
 router = APIRouter(tags=["documents"])
 
-
-def _map_document_error(exception: Exception) -> HTTPException:
-    if isinstance(exception, ProjectNotFoundError):
-        return HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Project not found",
-        )
-
-    if isinstance(exception, DocumentNotFoundError):
-        return HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Document not found",
-        )
-
-    return HTTPException(
-        status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-        detail="Only PDF uploads are allowed",
-    )
-
-
 @router.post("/documents/upload", response_model=DocumentRead, status_code=status.HTTP_201_CREATED)
 async def upload_document_route(
     db: DBSession,
+    ingestion_queue: BackgroundQueue = Depends(get_ingestion_queue),
     project_id: UUID = Form(...),
     uploaded_file: UploadFile = File(...),
 ) -> Document:
@@ -54,9 +34,10 @@ async def upload_document_route(
             filename=uploaded_file.filename,
             content_type=uploaded_file.content_type,
             file_bytes=file_bytes,
+            ingestion_queue=ingestion_queue
         )
     except (ProjectNotFoundError, InvalidDocumentUploadError) as exception:
-        raise _map_document_error(exception) from exception
+        raise exception from exception
 
     return document
 
@@ -69,7 +50,7 @@ def list_documents_route(
     try:
         documents = list_documents(db, project_id)
     except ProjectNotFoundError as exception:
-        raise _map_document_error(exception) from exception
+        raise exception from exception
 
     return [document for document in documents]
 
@@ -82,6 +63,6 @@ def get_document_route(
     try:
         document = get_document(db, document_id)
     except DocumentNotFoundError as exception:
-        raise _map_document_error(exception) from exception
+        raise exception from exception
 
     return document

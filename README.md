@@ -18,3 +18,11 @@ A production-oriented AI research platform for exploring computer science papers
 - Redis
 - React
 - Docker
+
+## Background ingestion
+
+Run the API and the ingestion worker as separate processes. From `backend/`:
+
+```powershell
+python -m app.background.worker
+```

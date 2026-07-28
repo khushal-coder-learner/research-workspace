@@ -7,9 +7,18 @@ requires-python = ">=3.12"
 dependencies = [
     "alembic>=1.18.5",
     "fastapi>=0.139.0",
+    "llama-index>=0.14.23",
+    "llama-index-embeddings-huggingface>=0.7.0",
+    "llama-index-llms-openrouter>=0.5.1",
+    "llama-index-readers-file>=0.6.0",
+    "llama-index-vector-stores-postgres>=0.8.1",
     "psycopg[binary]>=3.3.4",
     "pydantic-settings>=2.14.2",
+    "pymupdf>=1.28.0",
+    "pytest>=9.1.1",
+    "python-multipart>=0.0.32",
     "redis>=8.0.1",
+    "sentence-transformers>=5.6.0",
     "sqlalchemy>=2.0.51",
     "uvicorn>=0.50.2",
 ]

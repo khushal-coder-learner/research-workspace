@@ -2,28 +2,19 @@ from __future__ import annotations
 
 from uuid import UUID
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, status
 
 from app.core.dependencies import DBSession
+from app.core.exceptions import ProjectNotFoundError
 from app.projects.models import Project
 from app.projects.schemas import ProjectCreate, ProjectRead
 from app.projects.service import (
-    ProjectNotFoundError,
     create_project,
     get_project,
     list_projects,
 )
 
 router = APIRouter(tags=["projects"])
-
-
-def _map_project_error(exception: ProjectNotFoundError) -> HTTPException:
-    if isinstance(exception, ProjectNotFoundError):
-        return HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Project not found",
-        )
-
 
 @router.post("/projects", response_model=ProjectRead, status_code=status.HTTP_201_CREATED)
 def create_project_route(
@@ -43,4 +34,4 @@ def get_project_route(project_id: UUID, db: DBSession) -> Project:
     try:
         return get_project(db, project_id)
     except ProjectNotFoundError as exception:
-        raise _map_project_error(exception) from exception
+        raise exception from exception
