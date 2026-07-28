@@ -8,8 +8,7 @@ venv/
 
 # Environment
 .env
-.env.*
-
+0
 # IDE
 .vscode/
 .idea/
@@ -28,14 +27,26 @@ dist/
 
 # Testing
 .pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.pyre/
+.hypothesis/
 .coverage
+.coverage.*
+htmlcov/
 
 # Alembic
 backend/alembic/versions/*.pyc
 
 # Misc
+*.pdf
+*.db
+*.sqlite
 *.sqlite3
+*.sqlite-wal
+*.sqlite-shm
 
-backend/data
-backend/scripts
-backend/playground
+backend/storage/
+backend/data/
+backend/scripts/
+backend/playground/
