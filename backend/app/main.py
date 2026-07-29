@@ -19,3 +19,7 @@ register_exception_handlers(app)
 @app.get("/")
 def root():
     return {"message": "Research Workspace API"}
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}
